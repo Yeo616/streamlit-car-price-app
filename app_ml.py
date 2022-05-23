@@ -1,9 +1,11 @@
 import streamlit as st
 import joblib
+import numpy as np
 
 def run_ml():
     st.subheader('자동차 구매 가능 금액 예측')
     
+    print(sklearn.__version)
     # 예측하기 위해서 필요한 파일들을 불러와야 된다.
     # 이 예에서는, 인공지능 파일, X 스케일러 파일, y 스케일러 파일
     # 3개를 불러와야 한다. 
@@ -30,10 +32,27 @@ def run_ml():
     age = st.number_input('나이',0,120)
     salary = st.number_input('연봉 입력',0)
     deb = st.number_input('빚 입력',0)
-    total = st.number_input('자산 입력',0)
+    worth = st.number_input('자산 입력',0)
 
-    customer = [gender,age,salary,deb,total]
+    if st.button('자동차 구매 금액 예측'):
+        # 학습은 웹대시보드에서 시키는 것이 아니다. 
+        # 1. 신규 고객의 정보를 넘파이 어레이로 만들어준다.
+        new_data = np.array([gender,age,salary,deb, worth])
 
-    # 다음에는 입력받은 값으로 예측하는 걸 진행해 볼것.
-    # 진행한 값으로 AWS에 업로드 할 것.
+        # 2. 학습할때 사용한 X의 피처 스케일러를 이용해서, 피처스케일링한다.
+        # 먼저, 데이터를 2차원으로 만들어준다.
+        new_data = new_data.reshape(1,5)
+        # 1행: 한명의 사람 정보, 5열: gender,age,salary,deb,worth
+        new_data = scaler_X.transform(new_data)
+
+        # 3. 인공지능에게 예측해달라고 한다.
+        y_pred = regressor.predict(new_data)
+
+        # 4. 예측한 값을, 원상복구 시킨다.
+        y_pred = scaler_y.inverse_transform(y_pred)
+
+        y_pred = round(y_pred[0,0])
+
+        st.write('이 사람의 구매 가능 금액은' + str(y_pred) + '달러 입니다.')
     
+        
